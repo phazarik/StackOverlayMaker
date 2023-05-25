@@ -44,20 +44,24 @@ void SetHistoStyle(TH1F *h, TString plotname, int color){
   //Y-axis
   h->GetYaxis()->SetTitle("Events");
   h->GetYaxis()->SetTitleFont(43);
-  h->GetYaxis()->SetTitleSize(15);
-  h->GetYaxis()->SetTitleOffset(1.6);
+  h->GetYaxis()->SetTitleSize(18);
+  h->GetYaxis()->SetTitleOffset(1.7);
   h->GetYaxis()->SetLabelFont(43);
-  h->GetYaxis()->SetLabelSize(20);
+  h->GetYaxis()->SetLabelSize(15);
+  h->GetYaxis()->SetLabelOffset(0.02);
   h->GetYaxis()->CenterTitle();
+  //h->GetYaxis()->SetTickLength(-0.02);
 
   //X-axis
   h->GetXaxis()->SetTitle(plotname);
   h->GetXaxis()->SetTitleFont(43);
-  h->GetXaxis()->SetTitleSize(15);
+  h->GetXaxis()->SetTitleSize(16);
   h->GetXaxis()->SetTitleOffset(1.5);
   h->GetXaxis()->SetLabelFont(43);
-  h->GetXaxis()->SetLabelSize(20);
+  h->GetXaxis()->SetLabelSize(15);
+  h->GetXaxis()->SetLabelOffset(0.02);
   //h->GetXaxis()->CenterTitle();
+  //h->GetXaxis()->SetTickLength(-0.02);
 }
 
 void PutText(TString jobname){

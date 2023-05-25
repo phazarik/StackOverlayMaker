@@ -26,12 +26,27 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 //This is the main function:
 void stackmaker(){
 
-  TString path = "/mnt/d/work/overlays/inputs/";
+  TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
   TString jobname = "VLLAna_2muSSskimmed_May23";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
-    {.name="SS_met", .title="MET", .rebin = 50, .xmin=0, .xmax=1000}
+    {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_mu0_mT",       .title="mu0 mT",       .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_mu0_reliso03", .title="mu0 reliso03", .rebin = 10, .xmin= 0, .xmax=15},
+    {.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 10, .xmin= 0, .xmax=15},
+    {.name="SS_mu0_sip3d",    .title="mu0 sip3d",    .rebin = 50, .xmin= 0, .xmax=50},
+    {.name="SS_mu1_Pt",       .title="mu1 pT",       .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_mu1_Eta",      .title="mu1 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_mu1_Phi",      .title="mu1 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_mu1_mT",       .title="mu1 mT",       .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_mu1_reliso03", .title="mu1 reliso03", .rebin = 10, .xmin= 0, .xmax=15},
+    {.name="SS_mu1_reliso04", .title="mu1 reliso04", .rebin = 10, .xmin= 0, .xmax=15},
+    {.name="SS_mu1_sip3d",    .title="mu1 sip3d",    .rebin = 50, .xmin= 0, .xmax=50},
+    {.name="SS_dimuon_mass",  .title="dimuon mass (mu0, mu1)",  .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_met",          .title="MET",          .rebin = 50, .xmin= 0, .xmax=1000}
   };
   
   for(int i=0; i<(int)variables.size(); i++) {
@@ -42,7 +57,7 @@ void stackmaker(){
 	 variables[i].rebin,
 	 variables[i].xmin,
 	 variables[i].xmax);
-    cout<<"Hist no. "<<i+1<<" plotted succesfully."<<endl;
+    cout<<"Hist no."<<i+1<<" plotted succesfully."<<endl;
   }
 
   cout<<"\nSucess!!\n"<<endl;
@@ -54,7 +69,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   
   //Global settings: 
   bool toStack = true;
-  bool toSave = false;
+  bool toSave = true;
   bool toLog = true;
   bool toSetRange = true;
   bool toOverlaySig = false; 
@@ -112,7 +127,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     }
   }
   //Making a stack of the sorted backgrounds:
-  cout<<"\nPraparing the stack with "<<(int)bkg.size()<<" no. of backgrounds ..."<<endl;
+  //cout<<"\nPraparing the stack with "<<(int)bkg.size()<<" no. of backgrounds ...";
   //Preparing fill colors:
   for(int i=0; i<(int)bkg.size(); i++){
     if(toStack) bkg[i].hist->SetFillColor(bkg[i].color);
@@ -121,7 +136,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   //Filling the stack with histograms:
   THStack *stack = new THStack("Stacked",plotname+";"+plotname+";Events");
   for(int i=0; i<(int)bkg.size(); i++){stack->Add(bkg[i].hist);}
-  cout<<"....Done!"<<endl;
+  //cout<<"....Done!"<<endl;
 
   //#######################################################################
   // Making the ratio hist. Comment this out, if not needed.
@@ -132,16 +147,20 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   float obs = data.hist->Integral();
   float exp = total_bkg->Integral();
   float obsbyexp = obs/exp;
-  cout<<"\nObs(data)/exp(MC) = "<<obsbyexp<<endl;
+  //cout<<"\nObs(data)/exp(MC) = "<<obsbyexp<<endl;
   
   //######################
   //Setting up the canvas:
   //######################
-  TCanvas *c1 = new TCanvas(plotname,plotname,700,600); 
+  TCanvas *c1 = new TCanvas(plotname,plotname,700,600);
+  
   TPad *mainPad = create_mainpad();
+  mainPad->SetMargin(mainPad->GetLeftMargin(), mainPad->GetRightMargin(), 0.15, 0.1);
   if(toLog) mainPad->SetLogy(1);
   mainPad->Draw();
+  
   TPad *ratioPad = create_ratiopad();
+  ratioPad->SetMargin(ratioPad->GetLeftMargin(), ratioPad->GetRightMargin(), 0.2, 0.1);
   ratioPad->Draw();
 
   //Legend:
@@ -150,15 +169,11 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   lg1->SetHeader(legendheader);
   TString datacount = "2018 data ["+to_string((int)data.hist->Integral())+"]";
   lg1->AddEntry(data.hist, datacount, "f");
-
-  /*
-  int sum_bkg=0;
   for(int i = (int)bkg.size()-1; i>-1;  i--){
-    sum_bkg = sum_bkg+bkg[i].num;
-    TString count = to_string((int)bkg[i].num);
-    TString name =  bkg[i].name+" ["+count+"]";
+    TString count = to_string((int)bkg[i].hist->Integral());
+    TString name = bkg[i].name + " ["+count+"]";
     lg1->AddEntry(bkg[i].hist, name, "f");
-    }*/
+  }
 
   /*
   if(toOverlaySig){
@@ -172,13 +187,15 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   PutText(jobname);
 
   mainPad->cd();
-  mainPad->SetFillStyle(4000); 
+  mainPad->SetFillStyle(4000);
+
+  //The following decoration overpowers previous decorations.
   //datahist->SetTitle(plottitle);
   data.hist->GetXaxis()->SetTitle(plottitle);
-  data.hist->GetYaxis()->SetTitle("");
+  data.hist->GetYaxis()->SetTitle("Events");
   data.hist->SetStats(0);
   if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
-  if(toLog) data.hist->GetYaxis()->SetRangeUser(1, 10E8);
+  if(toLog) data.hist->GetYaxis()->SetRangeUser(1, 10E7);
   
   data.hist->Draw("ep");
   stack->Draw("hist same");
@@ -208,14 +225,12 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   else line.DrawLine(min_x,1,max_x,1);
   
   //######################################################################
-  /*if(toSave){
-    if(toStack){
-      if(toLog) c1->SaveAs("plots/"+jobname+"_"+plotname+"_stacked_log.png");
-      if(!toLog) c1->SaveAs("plots/"+jobname+"_"+plotname+"_stacked.png");
-    }
-    if(!toStack){
-      if(toLog) c1->SaveAs("plots/"+jobname+"_"+plotname+"_overlayed_log.png");
-      if(!toLog) c1->SaveAs("plots/"+jobname+"_"+plotname+"_overlayed.png");
-    }
-    }*/
+  TString date_stamp = todays_date();
+  //cout<<"date = "<<date_stamp<<endl;
+  TString dump_folder = "outputs/"+date_stamp+"_"+jobname;
+  createFolder(dump_folder);
+
+  if(toSave){
+    c1->SaveAs(dump_folder+"/"+plotname+".png");
+  }
 }

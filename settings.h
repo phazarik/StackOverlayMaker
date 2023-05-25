@@ -1,11 +1,33 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cstdlib> // Required for running shell script
+#include <array>   
+#include <memory> // for keeping the output of the shell script
 
 bool ifexists(TString file_){
   std::string filepath = (std::string)file_;
   std::ifstream file(filepath);
   return file.good();
+}
+
+void createFolder(TString foldername){
+  std::string processline = "mkdir -p "+(std::string)foldername;
+  int result = system(processline.c_str());
+  if (result!=0) cout<<"Error : Failed to create folder."<<endl;
+}
+
+std::string todays_date(){
+  std::string processline = "date +%Y-%m-%d";
+  std::array<char, 128> buffer;
+  std::string result;
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(processline.c_str(), "r"), pclose);
+  if(!pipe) throw std::runtime_error("Failed to run Bash script.");
+  //Storing the buffer data in 'result'
+  while(fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) result += buffer.data();
+  // Remove trailing newline characters
+  while(!result.empty() && (result.back() == '\n' || result.back() == '\r')) result.pop_back();
+  return result;
 }
 
 struct hst{
@@ -91,7 +113,7 @@ vector<hst> hst_data ={
 
 //#################################################################################################
 vector<hst> read_files(vector<hst> vec, TString path, TString jobname, TString plotname){
-  cout<<"Reading "<<vec[0].group<<" files ....";
+  //cout<<"Reading "<<vec[0].group<<" files ....";
   vector<hst> newvec;
   for(int i=0; i<(int)vec.size(); i++){
     hst temp;
@@ -112,7 +134,7 @@ vector<hst> read_files(vector<hst> vec, TString path, TString jobname, TString p
       newvec.push_back(temp);
     }  
   }
-  cout<<".... success!"<<endl;
+  //cout<<".... success!"<<endl;
   return newvec;
 }
 
