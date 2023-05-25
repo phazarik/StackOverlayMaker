@@ -31,7 +31,7 @@ void stackmaker(){
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
-    {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 50, .xmin= 0, .xmax=1000},
+    /*{.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 50, .xmin= 0, .xmax=1000},
     {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu0_mT",       .title="mu0 mT",       .rebin = 50, .xmin= 0, .xmax=1000},
@@ -42,14 +42,24 @@ void stackmaker(){
     {.name="SS_mu1_Eta",      .title="mu1 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu1_Phi",      .title="mu1 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu1_mT",       .title="mu1 mT",       .rebin = 50, .xmin= 0, .xmax=1000},
-    {.name="SS_mu1_reliso03", .title="mu1 reliso03", .rebin = 10, .xmin= 0, .xmax=15},
-    {.name="SS_mu1_reliso04", .title="mu1 reliso04", .rebin = 10, .xmin= 0, .xmax=15},
+    {.name="SS_mu1_reliso03", .title="mu1 reliso03", .rebin = 10, .xmin= 0, .xmax=10},
+    {.name="SS_mu1_reliso04", .title="mu1 reliso04", .rebin = 10, .xmin= 0, .xmax=10},
     {.name="SS_mu1_sip3d",    .title="mu1 sip3d",    .rebin = 50, .xmin= 0, .xmax=50},
-    {.name="SS_dimuon_mass",  .title="dimuon mass (mu0, mu1)",  .rebin = 50, .xmin= 0, .xmax=1000},
-    {.name="SS_met",          .title="MET",          .rebin = 50, .xmin= 0, .xmax=1000}
+    {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_dEta_muons",   .title="dEta (SS pair)",.rebin = 50, .xmin= 0, .xmax=6},
+    {.name="SS_dPhi_muons",   .title="dPhi (SS pair)",.rebin = 50, .xmin= 0, .xmax=6},
+    {.name="SS_dR_muons",     .title="dR (SS pair)",  .rebin = 50, .xmin= 0, .xmax=6},
+    {.name="SS_ptratio",      .title="pT ratio (SS pair)",.rebin = 10, .xmin= 0, .xmax=1},
+    {.name="SS_met",          .title="MET",           .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_metphi",       .title="MET phi",       .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
+    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},*/
+    {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200}
   };
   
-  for(int i=0; i<(int)variables.size(); i++) {
+  for(int i=0; i<(int)variables.size(); i++){
     plot(path,
 	 jobname,
 	 variables[i].name,
@@ -57,7 +67,7 @@ void stackmaker(){
 	 variables[i].rebin,
 	 variables[i].xmin,
 	 variables[i].xmax);
-    cout<<"Hist no."<<i+1<<" plotted succesfully."<<endl;
+    cout<<"Hist no."<<i+1<<" ("<<variables[i].name<<") plotted succesfully."<<endl;
   }
 
   cout<<"\nSucess!!\n"<<endl;
@@ -68,11 +78,11 @@ void stackmaker(){
 void plot(TString path, TString jobname, TString plotname, TString plottitle, int binw, float xmin, float xmax){
   
   //Global settings: 
-  bool toStack = true;
-  bool toSave = true;
-  bool toLog = true;
-  bool toSetRange = true;
-  bool toOverlaySig = false; 
+  bool toStack      = true;
+  bool toSave       = false;
+  bool toLog        = true;
+  bool toSetRange   = true;
+  bool toOverlaySig = true; 
   
   //###################################
   //Reading histograms and sorting them
@@ -101,20 +111,40 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   bkg.push_back(merge_and_decorate(WZ,    "WZ",    plotname, kBlue-9));
   bkg.push_back(merge_and_decorate(ZZ,    "ZZ",    plotname, kBlue-7));
 
-  //Read signal and data also:
-  merged data = merge_and_decorate(Data, "Data", plotname, kBlack);
-
   //#################################################################
   //Decorating the histograms and setting the bins:
+  //Decorating the backgrounds:
   for(int i=0; i<(int)bkg.size(); i++){
     SetHistoStyle(bkg[i].hist, plotname, bkg[i].color);
     bkg[i].hist->Rebin(binw);
     SetOverflowBin(bkg[i].hist);
   }
-  //For signal and data:
+
+  //Reading and decorating data:
+  merged data = merge_and_decorate(Data, "Data", plotname, kBlack);
   SetHistoStyle(data.hist, plotname, kBlack);
   data.hist->Rebin(binw);
   SetOverflowBin(data.hist);
+
+  //Reading and decorating signal:
+  //Only one signal file for now.
+  TString sigpath="inputs/"+jobname+"/signal/";
+  vector<TString> sigfile = {"hst_VLL100.root"};
+  vector<float> lumi = {508761.54}; // 595251 events /1.17 pb
+  //Make sure that the sizes of sigfile and lumi are the same.
+  vector<TH1F*> sighist;
+  for(int i=0; i<sigfile.size(); i++){
+    TString fullpath = sigpath+sigfile[i];
+    TFile *t = new TFile(fullpath);
+    TH1F *h = (TH1F *)t->Get(plotname);
+    h->Scale(59700/lumi[i]);
+    SetHistoStyle(h, plotname, kRed);
+    h->Rebin(binw);
+    SetOverflowBin(h);
+    sighist.push_back(h);
+  }
+
+  
 
   //#################################################################
   //Preparing the stack:
@@ -174,12 +204,10 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     TString name = bkg[i].name + " ["+count+"]";
     lg1->AddEntry(bkg[i].hist, name, "f");
   }
-
-  /*
   if(toOverlaySig){
     TString sigcount100 = "VLL100 ["+to_string((int)sighist[0]->Integral())+"]";
     lg1->AddEntry(sighist[0], sigcount100, "f");
-    }*/
+  }
   
   //####################
   //Drawing on mainpad
@@ -199,7 +227,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   
   data.hist->Draw("ep");
   stack->Draw("hist same");
-  //if(toOverlaySig) sighist[0]->Draw("hist same");
+  if(toOverlaySig) sighist[0]->Draw("hist same");
   data.hist->Draw("ep same");
   lg1->Draw("same");
 
@@ -213,7 +241,6 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   hst_ratio->GetYaxis()->SetRangeUser(0, 2);
   hst_ratio->GetYaxis()->SetNdivisions(5, kTRUE);
   if(toSetRange) hst_ratio->GetXaxis()->SetRangeUser(xmin, xmax);
-  //hst_ratio->Rebin(binw);
   hst_ratio->SetStats(0);
   hst_ratio->Draw("ep");
 
@@ -226,7 +253,6 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   
   //######################################################################
   TString date_stamp = todays_date();
-  //cout<<"date = "<<date_stamp<<endl;
   TString dump_folder = "outputs/"+date_stamp+"_"+jobname;
   createFolder(dump_folder);
 
