@@ -27,7 +27,8 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackmaker(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  TString jobname = "VLLAna_2muSSskimmed_May23";
+  //TString jobname = "VLLAna_2muSSskimmed_May23";
+  TString jobname = "Skimmed_BasicSelection_May29";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
@@ -56,7 +57,9 @@ void stackmaker(){
     {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 50, .xmin= 0, .xmax=1000},
     {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
     {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},*/
-    {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200}
+    {.name="SS_cutflow_obj",  .title="CutFlow (object level)",  .rebin = 1, .xmin= 0, .xmax=10},
+    {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=10},
+    {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=10},
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -217,18 +220,112 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   mainPad->cd();
   mainPad->SetFillStyle(4000);
 
-  //The following decoration overpowers previous decorations.
-  //datahist->SetTitle(plottitle);
-  data.hist->GetXaxis()->SetTitle(plottitle);
-  data.hist->GetYaxis()->SetTitle("Events");
-  data.hist->SetStats(0);
-  if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
-  if(toLog) data.hist->GetYaxis()->SetRangeUser(1, 10E7);
+  //Normalising the histogrms, if not to stack:
+  if(!toStack){
+    data.hist->Scale(1/data.hist->Integral());
+    if(toOverlaySig) for(int i=0; i<(int)sighist.size(); i++) sighist[i]->Scale(1/sighist[i]->Integral());
+    for(int i=0; i<(int)bkg.size(); i++) bkg[i].hist->Scale(1/bkg[i].hist->Integral());
+  }
+
+  //####################
+  //Finding the 'peaks':
+  //####################
+  int nbins = data.hist->GetNbinsX();
+  float data_peak = 0; float stack_peak=0;
+  for(int bin=0; bin<nbins; bin++){
+    float ydata = 0;
+    float ystack = 0;
+    
+    ydata = data.hist->GetBinContent(bin);
+    for(int i=0; i<(int)bkg.size(); i++){ystack = ystack + bkg[i].hist->GetBinContent(bin);}
+
+    if(ydata  > data_peak)  data_peak  = ydata;
+    if(ystack > stack_peak) stack_peak = ystack;
+  }
+  //Finding the tallest background index:
+  float bkg_peak =0; int tallest_bkg = -1;
+  for(int i=0; i<(int)bkg.size(); i++){
+    for(int bin=0; bin<nbins; bin++){
+      int yvalue = bkg[i].hist->GetBinContent(bin);
+      if(yvalue > bkg_peak){
+	bkg_peak = yvalue;
+	tallest_bkg = i;
+      }	
+    }
+  }
+  //Finding the tallest signal index:
+  float sig_peak =0; int tallest_sig = -1;
+  for(int i=0; i<(int)sighist.size(); i++){
+    for(int bin=0; bin<nbins; bin++){
+      int yvalue = sighist[i]->GetBinContent(bin);
+      if(yvalue > sig_peak){
+	sig_peak = yvalue;
+	tallest_sig = i;
+      }	
+    }
+  }
+
+  //###################
+  //Drawing with stack:
+  //###################
+  if(toStack){
+    if(stack_peak > data_peak){
+      stack->Draw("hist");
+      stack->GetYaxis()->SetTitle("Events/sildbv");
+      stack->GetXaxis()->SetTitle(plottitle);
+      stack->SetTitle("");
+      if(toSetRange) stack->GetXaxis()->SetRangeUser(xmin, xmax);
+    }
+    else{
+      data.hist->GetXaxis()->SetTitle(plottitle);
+      data.hist->GetYaxis()->SetTitle("Events");
+      data.hist->SetStats(0);
+      if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
+      data.hist->GetYaxis()->SetRangeUser(1, 10E7);
+      data.hist->Draw("ep");
+    }
   
-  data.hist->Draw("ep");
-  stack->Draw("hist same");
-  if(toOverlaySig) sighist[0]->Draw("hist same");
-  data.hist->Draw("ep same");
+    stack->Draw("hist same");
+    if(toOverlaySig) sighist[0]->Draw("hist same");
+    data.hist->Draw("ep same");
+  }
+
+  //################
+  // Overlay only:
+  //################
+  if(!toStack){
+    //if data is tallest:
+    if(data_peak > bkg_peak && data_peak > sig_peak){
+      data.hist->GetXaxis()->SetTitle(plottitle);
+      data.hist->GetYaxis()->SetTitle("Events");
+      data.hist->SetStats(0);
+      if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
+      data.hist->Draw("hist");
+    }
+    //if one of the backgroud is tallest:
+    else if(bkg_peak > data_peak && bkg_peak > sig_peak){
+      bkg[tallest_bkg].hist->GetXaxis()->SetTitle(plottitle);
+      bkg[tallest_bkg].hist->GetYaxis()->SetTitle("Events");
+      bkg[tallest_bkg].hist->SetStats(0);
+      if(toSetRange) bkg[tallest_bkg].hist->GetXaxis()->SetRangeUser(xmin, xmax);
+      bkg[tallest_bkg].hist->Draw("hist");
+    }
+    //if signal is tallest:
+    else if(sig_peak > data_peak && sig_peak > bkg_peak && toOverlaySig){
+      sighist[tallest_sig]->GetXaxis()->SetTitle(plottitle);
+      sighist[tallest_sig]->GetYaxis()->SetTitle("Events");
+      sighist[tallest_sig]->SetStats(0);
+      if(toSetRange) sighist[tallest_sig]->GetXaxis()->SetRangeUser(xmin, xmax);
+      sighist[tallest_sig]->Draw("hist");
+    }
+
+    //Drawing the rest:
+    data.hist->Draw("hist same");
+    if(toOverlaySig) sighist[0]->Draw("hist same");
+    for(int i=0; i<(int)bkg.size(); i++) bkg[i].hist->Draw("hist_same");
+
+  }
+
   lg1->Draw("same");
 
   //#########################
