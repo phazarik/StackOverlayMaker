@@ -27,39 +27,41 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackmaker(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  //TString jobname = "VLLAna_2muSSskimmed_May23";
-  TString jobname = "Skimmed_BasicSelection_May29";
+  //TString jobname = "Skimmed_BasicSelection_May30";
+  //TString jobname = "Skimmed_IsoMu0_May30";
+  TString jobname = "Skimmed_IsoMuall_May30";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
-    /*{.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_mu0_mT",       .title="mu0 mT",       .rebin = 50, .xmin= 0, .xmax=1000},
-    {.name="SS_mu0_reliso03", .title="mu0 reliso03", .rebin = 10, .xmin= 0, .xmax=15},
-    {.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 10, .xmin= 0, .xmax=15},
-    {.name="SS_mu0_sip3d",    .title="mu0 sip3d",    .rebin = 50, .xmin= 0, .xmax=50},
-    {.name="SS_mu1_Pt",       .title="mu1 pT",       .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_mu0_mT",       .title="mu0 mT",       .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_mu0_reliso03", .title="mu0 reliso03", .rebin = 1, .xmin= 0, .xmax=1},
+    {.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 1, .xmin= 0, .xmax=1},
+    {.name="SS_mu0_sip3d",    .title="mu0 sip3d",    .rebin = 5, .xmin= 0, .xmax=5},
+    {.name="SS_mu1_Pt",       .title="mu1 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_mu1_Eta",      .title="mu1 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu1_Phi",      .title="mu1 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_mu1_mT",       .title="mu1 mT",       .rebin = 50, .xmin= 0, .xmax=1000},
-    {.name="SS_mu1_reliso03", .title="mu1 reliso03", .rebin = 10, .xmin= 0, .xmax=10},
-    {.name="SS_mu1_reliso04", .title="mu1 reliso04", .rebin = 10, .xmin= 0, .xmax=10},
-    {.name="SS_mu1_sip3d",    .title="mu1 sip3d",    .rebin = 50, .xmin= 0, .xmax=50},
-    {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 50, .xmin= 0, .xmax=1000},
-    {.name="SS_dEta_muons",   .title="dEta (SS pair)",.rebin = 50, .xmin= 0, .xmax=6},
-    {.name="SS_dPhi_muons",   .title="dPhi (SS pair)",.rebin = 50, .xmin= 0, .xmax=6},
-    {.name="SS_dR_muons",     .title="dR (SS pair)",  .rebin = 50, .xmin= 0, .xmax=6},
+    {.name="SS_mu1_mT",       .title="mu1 mT",       .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_mu1_reliso03", .title="mu1 reliso03", .rebin = 5, .xmin= 0, .xmax=10},
+    {.name="SS_mu1_reliso04", .title="mu1 reliso04", .rebin = 5, .xmin= 0, .xmax=10},
+    {.name="SS_mu1_sip3d",    .title="mu1 sip3d",    .rebin = 20, .xmin= 0, .xmax=50},
+    {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_dEta_muons",   .title="dEta (SS pair)",.rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dPhi_muons",   .title="dPhi (SS pair)",.rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dR_muons",     .title="dR (SS pair)",  .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_ptratio",      .title="pT ratio (SS pair)",.rebin = 10, .xmin= 0, .xmax=1},
-    {.name="SS_met",          .title="MET",           .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_met",          .title="MET",           .rebin = 20, .xmin= 0, .xmax=1000},
     {.name="SS_metphi",       .title="MET phi",       .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 50, .xmin= 0, .xmax=1000},
-    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 20, .xmin= 0, .xmax=1000},
+    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 20, .xmin= 0, .xmax=1000},
     {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
-    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},*/
-    {.name="SS_cutflow_obj",  .title="CutFlow (object level)",  .rebin = 1, .xmin= 0, .xmax=10},
-    {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=10},
-    {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=10},
+    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},/*
+    {.name="SS_cutflow_obj",  .title="CutFlow (object level)",  .rebin = 1, .xmin= 0, .xmax=15},
+    {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=15},
+    {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=15},
+    {.name="SS_cutflow_combined",  .title="CutFlow (combined)",  .rebin = 1, .xmin= 0, .xmax=15},*/
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -82,10 +84,12 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   
   //Global settings: 
   bool toStack      = true;
-  bool toSave       = false;
-  bool toLog        = true;
+  bool toSave       = true;
+  bool toLog        = false;
   bool toSetRange   = true;
-  bool toOverlaySig = true; 
+  bool toOverlaySig = true;
+
+  float sigscale = 100;
   
   //###################################
   //Reading histograms and sorting them
@@ -141,6 +145,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     TFile *t = new TFile(fullpath);
     TH1F *h = (TH1F *)t->Get(plotname);
     h->Scale(59700/lumi[i]);
+    h->Scale(sigscale);
     SetHistoStyle(h, plotname, kRed);
     h->Rebin(binw);
     SetOverflowBin(h);
@@ -208,7 +213,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     lg1->AddEntry(bkg[i].hist, name, "f");
   }
   if(toOverlaySig){
-    TString sigcount100 = "VLL100 ["+to_string((int)sighist[0]->Integral())+"]";
+    TString sigcount100 = "VLL100 ["+to_string((int)(sighist[0]->Integral()/sigscale))+"]";
     lg1->AddEntry(sighist[0], sigcount100, "f");
   }
   
@@ -267,8 +272,9 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 
   //###################
   //Drawing with stack:
-  //###################
+  //###################  
   if(toStack){
+    //If the stack is tallest:
     if(stack_peak > data_peak){
       stack->Draw("hist");
       stack->GetYaxis()->SetTitle("Events/sildbv");
@@ -276,6 +282,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
       stack->SetTitle("");
       if(toSetRange) stack->GetXaxis()->SetRangeUser(xmin, xmax);
     }
+    //If data is tallest:
     else{
       data.hist->GetXaxis()->SetTitle(plottitle);
       data.hist->GetYaxis()->SetTitle("Events");
@@ -283,13 +290,23 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
       if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
       data.hist->GetYaxis()->SetRangeUser(1, 10E7);
       data.hist->Draw("ep");
-    }
-  
+    } 
     stack->Draw("hist same");
-    if(toOverlaySig) sighist[0]->Draw("hist same");
     data.hist->Draw("ep same");
+    if(toOverlaySig) sighist[0]->Draw("hist same");
   }
-
+  
+  /*
+  data.hist->GetXaxis()->SetTitle(plottitle);
+  data.hist->GetYaxis()->SetTitle("Events");
+  data.hist->SetStats(0);
+  if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
+  data.hist->GetYaxis()->SetRangeUser(1, 10E7);
+  data.hist->Draw("ep");
+  stack->Draw("hist same");
+  if(toOverlaySig) sighist[0]->Draw("hist same");
+  data.hist->Draw("ep same");*/
+  
   //################
   // Overlay only:
   //################

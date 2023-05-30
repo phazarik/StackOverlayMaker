@@ -46,62 +46,62 @@ struct merged{
 //Sample list:
 vector<hst> hst_qcd = {
   {.group = "QCD_MuEnriched", .subgr="20to30",   .lumi= 23.893},
-  {.group = "QCD_MuEnriched", .subgr="30to50",   .lumi= 42.905},
-  {.group = "QCD_MuEnriched", .subgr="50to80",   .lumi= 105.88},
+  {.group = "QCD_MuEnriched", .subgr="30to50",   .lumi= 42.906},
+  {.group = "QCD_MuEnriched", .subgr="50to80",   .lumi= 105.880},
   {.group = "QCD_MuEnriched", .subgr="80to120",  .lumi= 508.715},
   {.group = "QCD_MuEnriched", .subgr="120to170", .lumi= 1802.854},
-  {.group = "QCD_MuEnriched", .subgr="170to300", .lumi= 10265.816},
-  {.group = "QCD_MuEnriched", .subgr="300to470", .lumi= 95249.234},
-  {.group = "QCD_MuEnriched", .subgr="470to600", .lumi= 656872.125},
-  {.group = "QCD_MuEnriched", .subgr="600to800", .lumi= 2060827.75},
-  {.group = "QCD_MuEnriched", .subgr="800to1000",.lumi= 24060648}
+  {.group = "QCD_MuEnriched", .subgr="170to300", .lumi= 10265.815},
+  {.group = "QCD_MuEnriched", .subgr="300to470", .lumi= 95249.242},
+  {.group = "QCD_MuEnriched", .subgr="470to600", .lumi= 656872.156},
+  {.group = "QCD_MuEnriched", .subgr="600to800", .lumi= 2060827.812},
+  {.group = "QCD_MuEnriched", .subgr="800to1000",.lumi= 11337379.457}
 };
 
 vector<hst> hst_wjets = {
-  {.group = "HTbinnedWJets", .subgr="70to100",   .lumi= 52100.898},
-  {.group = "HTbinnedWJets", .subgr="100to200",  .lumi= 41127.176},
-  {.group = "HTbinnedWJets", .subgr="200to400",  .lumi= 172265.187},
-  {.group = "HTbinnedWJets", .subgr="400to600",  .lumi= 163821.094},
-  {.group = "HTbinnedWJets", .subgr="600to800",  .lumi= 708793.812},
-  {.group = "HTbinnedWJets", .subgr="800to1200", .lumi= 1481985.25},
-  {.group = "HTbinnedWJets", .subgr="1200to2500",.lumi= 5602003.5},
-  {.group = "HTbinnedWJets", .subgr="2500toInf", .lumi= 79396216}
+  {.group = "HTbinnedWJets", .subgr="70to100",   .lumi= 52100.910},
+  {.group = "HTbinnedWJets", .subgr="100to200",  .lumi= 41127.174},
+  {.group = "HTbinnedWJets", .subgr="200to400",  .lumi= 172265.183},
+  {.group = "HTbinnedWJets", .subgr="400to600",  .lumi= 163821.083},
+  {.group = "HTbinnedWJets", .subgr="600to800",  .lumi= 708793.021},
+  {.group = "HTbinnedWJets", .subgr="800to1200", .lumi= 1481985.193},
+  {.group = "HTbinnedWJets", .subgr="1200to2500",.lumi= 5602003.457},
+  {.group = "HTbinnedWJets", .subgr="2500toInf", .lumi= 79396214.989}
 };
 
 vector<hst> hst_dy = {
-  {.group = "DYJetsToLL", .subgr="M10to50", .lumi=5925.521},
-  {.group = "DYJetsToLL", .subgr="M50",     .lumi=30321.148}
+  {.group = "DYJetsToLL", .subgr="M10to50", .lumi=5925.522},
+  {.group = "DYJetsToLL", .subgr="M50",     .lumi=30321.155}
 };
 
 vector<hst> hst_singletop = {
-  {.group = "SingleTop", .subgr="s-channel_LeptonDecays",            .lumi=5456748.5},
-  {.group = "SingleTop", .subgr="t-channel_AntiTop_InclusiveDecays", .lumi=1407728.5},
-  {.group = "SingleTop", .subgr="t-channel_Top_InclusiveDecays",     .lumi=1558659.25},
-  {.group = "SingleTop", .subgr="tW_AntiTop_InclusiceDecays",        .lumi=238357.437},
-  {.group = "SingleTop", .subgr="tW_Top_InclusiveDecays",            .lumi=245177.187}
+  {.group = "SingleTop", .subgr="s-channel_LeptonDecays",            .lumi=5456748.098},
+  {.group = "SingleTop", .subgr="t-channel_AntiTop_InclusiveDecays", .lumi=1407728.544},
+  {.group = "SingleTop", .subgr="t-channel_Top_InclusiveDecays",     .lumi=1572627.866},
+  {.group = "SingleTop", .subgr="tW_AntiTop_InclusiceDecays",        .lumi=238357.428},
+  {.group = "SingleTop", .subgr="tW_Top_InclusiveDecays",            .lumi=245177.196}
 };
 
 vector<hst> hst_ttbar = {
-  {.group = "TTBar", .subgr="TTTo2L2Nu",        .lumi=1642541.625},
-  {.group = "TTBar", .subgr="TTToSemiLeptonic", .lumi=1304012.875}
+  {.group = "TTBar", .subgr="TTTo2L2Nu",        .lumi=1642541.624},
+  {.group = "TTBar", .subgr="TTToSemiLeptonic", .lumi=1304012.700}
 };
 
 vector<hst> hst_ww = {
-  {.group = "WW", .subgr="WWTo1L1Nu2Q", .lumi=787485.562},
-  {.group = "WW", .subgr="WWTo4Q",      .lumi=773049.75}
+  {.group = "WW", .subgr="WWTo1L1Nu2Q", .lumi=805257.731},
+  {.group = "WW", .subgr="WWTo4Q",      .lumi=773049.853}
 };
 
 vector<hst> hst_wz = {
-  {.group = "WZ", .subgr="WZTo1L1Nu2Q", .lumi=805170},
-  {.group = "WZ", .subgr="WZTo2Q2L",    .lumi=4499606.5},
-  {.group = "WZ", .subgr="WZTo3LNu",    .lumi=1889798.5}
+  {.group = "WZ", .subgr="WZTo1L1Nu2Q", .lumi=805257.731},
+  {.group = "WZ", .subgr="WZTo2Q2L",    .lumi=4499605.731},
+  {.group = "WZ", .subgr="WZTo3LNu",    .lumi=1889798.538}
 };
 
 vector<hst> hst_zz = {
-  {.group = "ZZ", .subgr="ZZTo2L2Nu", .lumi=56787840},
-  {.group = "ZZ", .subgr="ZZTo2Q2L",  .lumi=7928149},
-  {.group = "ZZ", .subgr="ZZTo2Q2Nu", .lumi=4405016.5},
-  {.group = "ZZ", .subgr="ZZTo4L",    .lumi=74330560}
+  {.group = "ZZ", .subgr="ZZTo2L2Nu", .lumi=58416512.631},
+  {.group = "ZZ", .subgr="ZZTo2Q2L",  .lumi=7928149.608},
+  {.group = "ZZ", .subgr="ZZTo2Q2Nu", .lumi=4405016.452},
+  {.group = "ZZ", .subgr="ZZTo4L",    .lumi=74330566.038}
 };
 
 vector<hst> hst_data ={
