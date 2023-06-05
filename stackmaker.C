@@ -29,10 +29,11 @@ void stackmaker(){
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
   //TString jobname = "Skimmed_BasicSelection_May30";
   //TString jobname = "Skimmed_IsoMu0_May30";
-  TString jobname = "Skimmed_IsoMuons_mu030_May31";
+  //TString jobname = "Skimmed_IsoMuons_mu030_May31";
+  TString jobname = "Skimmed_QCDsf_Jun5";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
-  vector<varlist> variables = {
+  vector<varlist> variables = {/*
     {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
@@ -57,11 +58,12 @@ void stackmaker(){
     {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
-    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10}/*,
+    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10}*//*,
     {.name="SS_cutflow_obj",  .title="CutFlow (object level)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_combined",  .title="CutFlow (combined)",  .rebin = 1, .xmin= 0, .xmax=15},*/
+    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=200},
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -84,9 +86,9 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   
   //Global settings: 
   bool toStack      = true;
-  bool toSave       = true;
+  bool toSave       = false;
   bool toLog        = false;
-  bool toSetRange   = true;
+  bool toSetRange   = false;
   bool toOverlaySig = true;
 
   float sigscale = 100;
@@ -109,6 +111,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 
   //Push back all the backgrounds into a vector:
   vector<merged> bkg;
+  bkg.push_back(merge_and_decorate(QCD,   "QCD",   plotname, kYellow));
   bkg.push_back(merge_and_decorate(DY,    "DY",    plotname, kRed-9));
   bkg.push_back(merge_and_decorate(WJets, "WJets", plotname, kGray+1));
   bkg.push_back(merge_and_decorate(ST,    "ST",    plotname, kCyan-9));
@@ -116,7 +119,6 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   bkg.push_back(merge_and_decorate(WW,    "WW",    plotname, kGreen-4));
   bkg.push_back(merge_and_decorate(WZ,    "WZ",    plotname, kBlue-9));
   bkg.push_back(merge_and_decorate(ZZ,    "ZZ",    plotname, kBlue-7));
-  bkg.push_back(merge_and_decorate(QCD,   "QCD",   plotname, kYellow));
   
   //#################################################################
   //Decorating the histograms and setting the bins:
@@ -152,7 +154,8 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     sighist.push_back(h);
   }
 
-  
+  //Extra: HT-binned SF calculation:
+  if(plotname == "SS_HT") find_sf(bkg[0].hist, data.hist);
 
   //#################################################################
   //Preparing the stack:
