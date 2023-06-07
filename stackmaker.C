@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "settings.h"
 #include "decorations.h"
 using namespace std;
@@ -28,12 +29,11 @@ void stackmaker(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
   //TString jobname = "Skimmed_BasicSelection_May30";
-  //TString jobname = "Skimmed_IsoMu0_May30";
-  //TString jobname = "Skimmed_IsoMuons_mu030_May31";
-  TString jobname = "Skimmed_QCDsf_Jun5";
+  //TString jobname = "Skimmed_15iso1_Jun05";
+  TString jobname = "Skimmed_isoptcuts_Jun06";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
-  vector<varlist> variables = {/*
+  vector<varlist> variables = {
     {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
@@ -56,14 +56,15 @@ void stackmaker(){
     {.name="SS_met",          .title="MET",           .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_metphi",       .title="MET phi",       .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
     {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
-    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10}*//*,
+    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},/*
     {.name="SS_cutflow_obj",  .title="CutFlow (object level)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_combined",  .title="CutFlow (combined)",  .rebin = 1, .xmin= 0, .xmax=15},*/
-    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=200},
+    //{.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
+    //{.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 1, .xmin= 0, .xmax=1},
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -74,7 +75,7 @@ void stackmaker(){
 	 variables[i].rebin,
 	 variables[i].xmin,
 	 variables[i].xmax);
-    cout<<"Hist no."<<i+1<<" ("<<variables[i].name<<") plotted succesfully."<<endl;
+    cout<<"Hist no."<<i+1<<" ("<<variables[i].name<<") plotted succesfully.\n"<<endl;
   }
 
   cout<<"\nSucess!!\n"<<endl;
@@ -85,13 +86,15 @@ void stackmaker(){
 void plot(TString path, TString jobname, TString plotname, TString plottitle, int binw, float xmin, float xmax){
   
   //Global settings: 
-  bool toStack      = true;
-  bool toSave       = false;
-  bool toLog        = false;
-  bool toSetRange   = false;
-  bool toOverlaySig = true;
+  bool toStack        = true;
+  bool toSave         = true;
+  bool toLog          = true;
+  bool toSetRange     = true;
+  bool toOverlaySig   = true;
+  bool toScaleHT      = false;
+  bool toPrintBinInfo = false;
 
-  float sigscale = 100;
+  float sigscale = 1;
   
   //###################################
   //Reading histograms and sorting them
@@ -155,7 +158,9 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   }
 
   //Extra: HT-binned SF calculation:
-  if(plotname == "SS_HT") find_sf(bkg[0].hist, data.hist);
+  if(toScaleHT)
+    if(plotname == "SS_HT")
+      bkg[0].hist = find_sf(bkg[0].hist, data.hist);
 
   //#################################################################
   //Preparing the stack:
@@ -219,6 +224,17 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     TString sigcount100 = "VLL100 ["+to_string((int)(sighist[0]->Integral()/sigscale))+"]";
     lg1->AddEntry(sighist[0], sigcount100, "f");
   }
+
+  //binwise obs/exp
+  if(toPrintBinInfo){
+    for(int bin=1; bin<(int)data.hist->GetNbinsX(); bin++){
+      float obs = 0;
+      float exp = 0;
+      obs = data.hist->GetBinContent(bin);
+      for(int i=0; i<(int)bkg.size(); i++) exp = exp + bkg[i].hist->GetBinContent(bin);
+      cout<<"Obs/exp for bin "<<bin<<" = "<<obs/exp<<endl;
+    }
+  }
   
   //####################
   //Drawing on mainpad
@@ -273,10 +289,19 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     }
   }
 
+  vector<float> peaks = {data_peak, bkg_peak, sig_peak};
+  int yrange = (int)log10(*max_element(peaks.begin(), peaks.end()));
+  yrange = yrange+2;
+  yrange = pow(10, yrange);
+  cout<<"yrange="<<yrange<<endl;
+
   //###################
   //Drawing with stack:
   //###################
-  
+  cout<<"Stack peak ="<<stack_peak<<endl;
+  cout<<"Data peak ="<<data_peak<<endl;
+
+  /*
   if(toStack){
     //If the stack is tallest:
     if(stack_peak > data_peak){
@@ -285,6 +310,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
       stack->GetXaxis()->SetTitle(plottitle);
       stack->SetTitle("");
       if(toSetRange) stack->GetXaxis()->SetRangeUser(xmin, xmax);
+      if(toLog) stack->GetYaxis()->SetRangeUser(1, yrange);
     }
     //If data is tallest:
     else{
@@ -292,21 +318,20 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
       data.hist->GetYaxis()->SetTitle("Events");
       data.hist->SetStats(0);
       if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
-      //data.hist->GetYaxis()->SetRangeUser(1, 10E7);
+      if(toLog) data.hist->GetYaxis()->SetRangeUser(1, yrange);
       data.hist->Draw("ep");
-    } 
+      }
     stack->Draw("hist same");
     data.hist->Draw("ep same");
     if(toOverlaySig) sighist[0]->Draw("hist same");
-  }
+    }*/
 
-  /*
   data.hist->GetXaxis()->SetTitle(plottitle);
   data.hist->GetYaxis()->SetTitle("Events");
   data.hist->SetStats(0);
   if(toSetRange) data.hist->GetXaxis()->SetRangeUser(xmin, xmax);
-  //data.hist->GetYaxis()->SetRangeUser(1, 10E7);
-  data.hist->Draw("ep");*/
+  data.hist->GetYaxis()->SetRangeUser(1, yrange);
+  data.hist->Draw("ep");
   stack->Draw("hist same");
   if(toOverlaySig) sighist[0]->Draw("hist same");
   data.hist->Draw("ep same");

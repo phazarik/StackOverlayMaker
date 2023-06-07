@@ -164,12 +164,10 @@ void SetOverflowBin(TH1F *h){
 //############################################
 // Finding QCD HT-binned scale factors:
 //############################################
-void find_sf(TH1F*qcd, TH1F*data){
+TH1F*find_sf(TH1F*qcd, TH1F*data){
   cout<<"\nCalculating HT binned sf for QCD ..."<<endl;
   cout<<"bin\trange\tnqcd\tndata\tsf"<<endl;
-  
-  vector<float> scaleqcd; scaleqcd.clear();
-  
+
   int nbins = data->GetNbinsX();
   for(int bin=1; bin<nbins+2; bin++){
     float nqcd = qcd->GetBinContent(bin);
@@ -183,7 +181,12 @@ void find_sf(TH1F*qcd, TH1F*data){
     float sf = ndata/nqcd;
 
     cout<<bin<<"\t"<<range<<"\t"<<(int)nqcd<<"\t"<<(int)ndata<<"\t"<<sf<<endl;
-
-    scaleqcd.push_back(sf);
   }
+  float nqcd_total = qcd->Integral();
+  float ndata_total = data->Integral();
+  float globalsf = ndata_total/nqcd_total;
+  cout<<"global scale factor = "<<globalsf<<endl;
+
+  qcd->Scale(globalsf);
+  return qcd;
 }
