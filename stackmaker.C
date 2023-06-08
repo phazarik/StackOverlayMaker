@@ -29,11 +29,11 @@ void stackmaker(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
   //TString jobname = "Skimmed_BasicSelection_May30";
-  //TString jobname = "Skimmed_15iso1_Jun05";
-  TString jobname = "Skimmed_isoptcuts_Jun06";
+  TString jobname = "Skimmed_15iso1_Jun05";
+  //TString jobname = "Skimmed_isoptcuts_Jun06";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
-  vector<varlist> variables = {
+  vector<varlist> variables = {/*
     {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
@@ -58,13 +58,13 @@ void stackmaker(){
     {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
     {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
-    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},/*
+    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},*//*
     {.name="SS_cutflow_obj",  .title="CutFlow (object level)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_combined",  .title="CutFlow (combined)",  .rebin = 1, .xmin= 0, .xmax=15},*/
-    //{.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
-    //{.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 1, .xmin= 0, .xmax=1},
+    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
+    //{.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 1, .xmin= 0, .xmax=5},
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -87,12 +87,12 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   
   //Global settings: 
   bool toStack        = true;
-  bool toSave         = true;
+  bool toSave         = false;
   bool toLog          = true;
   bool toSetRange     = true;
   bool toOverlaySig   = true;
-  bool toScaleHT      = false;
-  bool toPrintBinInfo = false;
+  bool toScaleHT      = true;
+  bool toPrintBinInfo = true;
 
   float sigscale = 1;
   
@@ -160,7 +160,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   //Extra: HT-binned SF calculation:
   if(toScaleHT)
     if(plotname == "SS_HT")
-      bkg[0].hist = find_sf(bkg[0].hist, data.hist);
+      bkg[0].hist = find_sf(bkg, data.hist);
 
   //#################################################################
   //Preparing the stack:
