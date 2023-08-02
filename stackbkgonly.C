@@ -28,7 +28,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackbkgonly(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  TString jobname = "hst_July27_v1";
+  TString jobname = "hst_Aug01_v1";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
@@ -136,9 +136,11 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 
   //SIGNAL:
   TString sigpath="inputs/"+jobname+"/signal/";
-  vector<TString> sigfile = {"hst_VLL100.root"};
-  vector<float> lumi = {508761.54}; // 595251 events /1.17 pb
-  //Make sure that the sizes of sigfile and lumi are the same.
+  vector<TString> sigfile = {"hst_VLL100.root", "hst_VLL150.root"};
+  vector<float> lumi = {508761.54, 2092051.72}; // 595251 events /1.17 pb, 606695 events /0.290 pb
+  vector<int> col = {kRed, kBlack};
+  //Make sure that the sizes of sigfile and lumi, col are the same.
+
   vector<TH1F*> sighist;
   for(int i=0; i<sigfile.size(); i++){
     TString fullpath = sigpath+sigfile[i];
@@ -146,7 +148,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     TH1F *h = (TH1F *)t->Get(plotname);
     h->Scale(59700/lumi[i]);
     h->Scale(sigscale);
-    SetHistoStyle(h, plotname, kRed);
+    SetHistoStyle(h, plotname, col[i]);
     h->Rebin(binw);
     SetOverflowBin(h);
     sighist.push_back(h);
@@ -224,6 +226,8 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   if(toOverlaySig){
     TString sigcount100 = "VLL100 ["+to_string((int)(sighist[0]->Integral()/sigscale))+"]";
     lg1->AddEntry(sighist[0], sigcount100, "f");
+    TString sigcount150 = "VLL150 ["+to_string((int)(sighist[1]->Integral()/sigscale))+"]";
+    lg1->AddEntry(sighist[1], sigcount150, "f");
   }
 
   //####################
@@ -250,7 +254,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   sighist[0]->Draw("hist");
   stack->Draw("hist same");
   //if(toOverlayData) data.hist->Draw("ep same");
-  sighist[0]->Draw("hist same");
+  for(int i =0; i<(int)sighist.size(); i++) sighist[i]->Draw("hist same");
   lg1->Draw("same");
 
 
