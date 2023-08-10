@@ -126,8 +126,9 @@ vector<hst> read_files(vector<hst> vec, TString path, TString jobname, TString p
       TFile *tfile = new TFile(filename);
       TH1F *hist = (TH1F *)tfile->Get(plotname);
       
-      //Lumiscaling:
+      //Lumiscaling (including QCD global scaling:):
       float scalefactor = 59700/vec[i].lumi;
+      if(temp.group == "QCD_MuEnriched") scalefactor = scalefactor*0.0242004;
       hist->Scale(scalefactor);
       
       temp.hist = hist;

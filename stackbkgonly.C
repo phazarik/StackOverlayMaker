@@ -28,10 +28,12 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackbkgonly(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  TString jobname = "hst_Aug01_v1";
+  TString jobname = "hst_Aug10_Basic";
+  //TString jobname = "hst_Aug10_NonIso";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
+    
     {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
     {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
@@ -46,6 +48,7 @@ void stackbkgonly(){
     {.name="SS_mu1_reliso03", .title="mu1 reliso03", .rebin = 1, .xmin= 0, .xmax=1},
     {.name="SS_mu1_reliso04", .title="mu1 reliso04", .rebin = 1, .xmin= 0, .xmax=1},
     {.name="SS_mu1_sip3d",    .title="mu1 sip3d",    .rebin = 5, .xmin= 0, .xmax=5},
+    /*
     {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_dEta_muons",   .title="dEta (SS pair)",.rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dPhi_muons",   .title="dPhi (SS pair)",.rebin = 20, .xmin= 0, .xmax=6},
@@ -56,14 +59,16 @@ void stackbkgonly(){
     {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
     {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
-    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},/*
-    {.name="SS_cutflow_obj",  .title="CutFlow (object level)",  .rebin = 1, .xmin= 0, .xmax=15},
-    {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=15},
-    {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=15},
-    {.name="SS_cutflow_combined",  .title="CutFlow (combined)",  .rebin = 1, .xmin= 0, .xmax=15},*/
-    //{.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
-    //{.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 1, .xmin= 0, .xmax=5},
-    //{.name="SS_cutflow_combined",  .title="CutFlow (combined)",  .rebin = 1, .xmin= 0, .xmax=15},
+    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},
+    {.name="SS_dphi_mu0_met",   .title="dPhi (mu0, met)",.rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dphi_muss_met",   .title="dPhi (mu1, met)",.rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_maxdphimet",   .title="max(dPhi mu, met)",.rebin = 20, .xmin= 0, .xmax=6},*/
+    /*
+    {.name="SS_cutflow",        .title="cutflow",       .rebin = 1, .xmin= 0, .xmax=10},
+    {.name="SS_cutflow_leading",.title="cutflow (mu0)", .rebin = 1, .xmin= 0, .xmax=20},
+    {.name="SS_cutflow_ssmuon", .title="cutflow (muss)",.rebin = 1, .xmin= 0, .xmax=20},*/
+
+    //{.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200},
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -95,6 +100,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   bool toScaleHT      = false;
   bool toPrintBinInfo = false;
   float sigscale = 1;
+  TString tag = "_afterQCDscaling";
   
   //###################################
   //Reading histograms and sorting them
@@ -142,7 +148,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   //Make sure that the sizes of sigfile and lumi, col are the same.
 
   vector<TH1F*> sighist;
-  for(int i=0; i<sigfile.size(); i++){
+  for(int i=0; i<(int)sigfile.size(); i++){
     TString fullpath = sigpath+sigfile[i];
     TFile *t = new TFile(fullpath);
     TH1F *h = (TH1F *)t->Get(plotname);
@@ -152,6 +158,25 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     h->Rebin(binw);
     SetOverflowBin(h);
     sighist.push_back(h);
+  }
+
+  //Data:
+  TString datapath = "inputs/"+jobname+"/SingleMuon/";
+  vector<TString> datafile = {"hst_SingleMuon_A.root","hst_SingleMuon_B.root","hst_SingleMuon_C.root","hst_SingleMuon_D.root"};
+  TH1F * datahist = nullptr;
+  if(toOverlayData){
+    for(int i=0; i<(int)datafile.size(); i++){
+      TString fullpath = datapath+datafile[i];
+      TFile *t = new TFile(fullpath);
+      TH1F *h = (TH1F *)t->Get(plotname);
+      SetHistoStyle(h, plotname, kBlack);
+      h->Rebin(binw);
+      SetOverflowBin(h);
+
+      if(datahist == nullptr) datahist = (TH1F *)h->Clone(0);
+      else datahist->Add(h);
+      
+    }
   }
   
   //#################################################################
@@ -191,12 +216,34 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     if(ystk > peak_stk) peak_stk = ystk;
   }
 
-  //S over root B
-  float SbyB_global = 0; float nsig=0; float nbkg=0;
+  //S over root B and obs-by-exp
+  float SbyB_global = 0; float obsbyexp_global = 0;
+  float nsig=0; float nbkg=0; float ndata=0;
   for(int i=0; i<(int)bkg.size(); i++) nbkg = nbkg + bkg[i].hist->Integral();
   nsig = sighist[0]->Integral();
-  if(nbkg!=0) SbyB_global = nsig/sqrt(nbkg);
+  if(toOverlayData) ndata = datahist->Integral();
+  
+  if(nbkg!=0){
+    SbyB_global = nsig/sqrt(nbkg);
+    obsbyexp_global = ndata/nbkg;
+  }
+  else cout<<"Error! nbkg = 0"<<endl;
+  
   cout<<"S over root B = "<<SbyB_global<<endl;
+
+  if(toPrintBinInfo){
+    cout<<"--------------------------------------------------------------------------"<<endl;
+    cout<<"Bin-wise significance:"<<endl;
+    int nbins = (int)sighist[0]->GetNbinsX();
+    for(int bin=0; bin<nbins; bin++){
+      float nsig = sighist[0]->GetBinContent(bin);
+      float nbkg = 0; for(int i=0; i<(int)bkg.size(); i++) nbkg = nbkg+bkg[i].hist->GetBinContent(bin);
+      float sbyb = 0;
+      if(nbkg !=0) sbyb = nsig/sqrt(nbkg);
+      cout<<"Cut"<<bin-1<<" : nsig = "<<(int)nsig<<"\t nbkg = "<<(int)nbkg<<"\t S/sqrt{B} = "<<sbyb<<endl;
+    }
+    cout<<"--------------------------------------------------------------------------"<<endl;
+  }
   
   //######################
   //Setting up the canvas:
@@ -213,11 +260,15 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   ratioPad->Draw();
 
   //Legend:
-  TLegend *lg1 = create_legend();  
-  TString legendheader = "S/sqrt(B) = "+to_string(SbyB_global);
+  TLegend *lg1 = create_legend();
+  TString legendheader = "";
+  if(toOverlayData) legendheader = "obs/exp = "+to_string(obsbyexp_global);
+  else legendheader = "S/sqrt(B) = "+to_string(SbyB_global);
   lg1->SetHeader(legendheader);
-  //TString datacount = "2018 data ["+to_string((int)data.hist->Integral())+"]";
-  //lg1->AddEntry(data.hist, datacount, "f");
+  if(toOverlayData){
+    TString datacount = "2018 data ["+to_string((int)datahist->Integral())+"]";
+    lg1->AddEntry(datahist, datacount, "f");
+  }
   for(int i = (int)bkg.size()-1; i>-1;  i--){
     TString count = to_string((int)bkg[i].hist->Integral());
     TString name = bkg[i].name + " ["+count+"]";
@@ -249,11 +300,11 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   sighist[0]->GetYaxis()->SetTitle("Events");
   sighist[0]->SetStats(0);
   if(toSetRange) sighist[0]->GetXaxis()->SetRangeUser(xmin, xmax);
-  sighist[0]->GetYaxis()->SetRangeUser(1, 1E5);
+  sighist[0]->GetYaxis()->SetRangeUser(0.1, 1E8);
 
   sighist[0]->Draw("hist");
   stack->Draw("hist same");
-  //if(toOverlayData) data.hist->Draw("ep same");
+  if(toOverlayData) datahist->Draw("ep same");
   for(int i =0; i<(int)sighist.size(); i++) sighist[i]->Draw("hist same");
   lg1->Draw("same");
 
@@ -261,7 +312,24 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   //#########################
   // Drawing on the ratiopad
   //#########################
-  TH1F *rootb = (TH1F *)bkg[0].hist->Clone("copy"); rootb->Reset();
+  TH1F *rootb, *ratio;
+
+  //Setting up obsbyexp:
+  if(toOverlayData){
+    TH1F *exp = (TH1F*)bkg[0].hist->Clone("copy"); exp->Reset();
+    for(int i=0; i<(int)bkg.size(); i++) exp->Add(bkg[i].hist);
+    ratio = (TH1F*)datahist->Clone("copy");
+    ratio->Divide(exp);
+    SetHistoStyle(ratio, plotname, kBlack);
+    ratio->GetYaxis()->SetTitle("obs/exp");
+    ratio->GetYaxis()->SetRangeUser(0, 2);
+    ratio->GetYaxis()->SetNdivisions(5, kTRUE);
+    if(toSetRange) ratio->GetXaxis()->SetRangeUser(xmin, xmax);
+    ratio->SetStats(0);
+  }
+
+  //Setting up s-by-rootB:
+  rootb = (TH1F *)bkg[0].hist->Clone("copy"); rootb->Reset();
   for(int i=0; i<(int)bkg.size(); i++) rootb->Add(bkg[i].hist);
   for(int bin=0; bin<rootb->GetNbinsX(); bin++){
     double val = rootb->GetBinContent(bin);
@@ -271,19 +339,30 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   }
   TH1F * srb = (TH1F *)sighist[0]->Clone("copy");
   srb->Divide(rootb);
-
-  ratioPad->cd();
   SetHistoStyle(srb, plotname, kBlack);
   srb->GetYaxis()->SetTitle("S/sqrt{B}");
   srb->GetYaxis()->SetRangeUser(0, 1);
   srb->GetYaxis()->SetNdivisions(5, kTRUE);
   if(toSetRange) srb->GetXaxis()->SetRangeUser(xmin, xmax);
   srb->SetStats(0);
-  srb->Draw("ep");
+
+  ratioPad->cd();
+
+  if(toOverlayData){
+    ratio->Draw("ep");
+    TLine line;
+    line.SetLineColor(kRed); line.SetLineWidth(2); line.SetLineStyle(1);
+    float min_x = datahist->GetXaxis()->GetXmin();
+    float max_x = datahist->GetXaxis()->GetXmax();
+    if(toSetRange) line.DrawLine(xmin,1,xmax,1);
+    else line.DrawLine(min_x,1,max_x,1);
+  }
+  
+  else srb->Draw("ep");
 
   //######################################################################
   TString date_stamp = todays_date();
-  TString dump_folder = "outputs/"+date_stamp+"_"+jobname;
+  TString dump_folder = "outputs/"+date_stamp+"_"+jobname+tag;
   createFolder(dump_folder);
 
   if(toSave){

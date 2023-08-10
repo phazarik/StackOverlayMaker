@@ -28,8 +28,8 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackmaker(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  //TString jobname = "Skimmed_BasicSelection_May30";
-  TString jobname = "Skimmed_15iso1_Jun05";
+  TString jobname = "Skimmed_BasicSelection_May30";
+  //TString jobname = "Skimmed_15iso1_Jun05";
   //TString jobname = "Skimmed_isoptcuts_Jun06";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
@@ -63,8 +63,9 @@ void stackmaker(){
     {.name="SS_cutflow_dimuon",.title="CutFlow (dimuon system)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_evt",  .title="CutFlow (event level)",  .rebin = 1, .xmin= 0, .xmax=15},
     {.name="SS_cutflow_combined",  .title="CutFlow (combined)",  .rebin = 1, .xmin= 0, .xmax=15},*/
-    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
+    //{.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
     //{.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 1, .xmin= 0, .xmax=5},
+    {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200},
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -91,8 +92,8 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   bool toLog          = true;
   bool toSetRange     = true;
   bool toOverlaySig   = true;
-  bool toScaleHT      = true;
-  bool toPrintBinInfo = true;
+  bool toScaleHT      = false;
+  bool toPrintBinInfo = false;
 
   float sigscale = 1;
   
