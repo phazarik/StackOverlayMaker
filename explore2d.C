@@ -21,11 +21,12 @@ bool fileExists(const char *filePath){
 
 void explore2d(){
 
-  TString plotname = "region_ht_met";
-  TString jobname = "hst_Aug02_v1";
-  TString plottitle = "HT-MET plane";
-  float xlim[2] = {0, 500};
-  float ylim[2] = {0, 500};
+  TString plotname = "region_ht_deta";
+  TString jobname = "hst_Aug10_WR";
+  TString plottitle = "HT-dEta plane";
+  TString tag = "";
+  float xlim[2] = {0, 1000};
+  float ylim[2] = {0, 6};
   int rebin[2] = {10, 10};
 
   //Switches:
@@ -94,7 +95,7 @@ void explore2d(){
       TFile *tfile = new TFile(fullpath);
       TH2F *hist = (TH2F *)tfile->Get(plotname);
       float scalefactor = 59700/bkg[i].lumi;
-      if(bkg[i].group == "QCD_MuEnriched") scalefactor = scalefactor*0.0242004;
+      if(bkg[i].group == "QCD_MuEnriched") scalefactor = scalefactor*0.024164;
       hist->Scale(scalefactor);
       hist->Rebin2D(rebin[0], rebin[1]);
 
@@ -144,7 +145,7 @@ void explore2d(){
   
   //-------------------------------------------------------------------
   TString date_stamp = todays_date();
-  TString dump_folder = "outputs/"+date_stamp+"_"+jobname+"/2d-plots";
+  TString dump_folder = "outputs/"+date_stamp+"_"+jobname+tag+"/2d-plots";
   createFolder(dump_folder);
 
   if(toSave){

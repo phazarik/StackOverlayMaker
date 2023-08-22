@@ -28,47 +28,45 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackbkgonly(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  TString jobname = "hst_Aug10_Basic";
-  //TString jobname = "hst_Aug10_NonIso";
+  TString jobname = "hst_Aug22_Basic2LSS";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
-    
-    {.name="SS_mu0_Pt",       .title="mu0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_mu0_Eta",      .title="mu0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_mu0_Phi",      .title="mu0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_mu0_mT",       .title="mu0 mT",       .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_mu0_reliso03", .title="mu0 reliso03", .rebin = 1, .xmin= 0, .xmax=1},
-    {.name="SS_mu0_reliso04", .title="mu0 reliso04", .rebin = 1, .xmin= 0, .xmax=1},
-    {.name="SS_mu0_sip3d",    .title="mu0 sip3d",    .rebin = 5, .xmin= 0, .xmax=5},
-    {.name="SS_mu1_Pt",       .title="mu1 pT",       .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_mu1_Eta",      .title="mu1 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_mu1_Phi",      .title="mu1 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_mu1_mT",       .title="mu1 mT",       .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_mu1_reliso03", .title="mu1 reliso03", .rebin = 1, .xmin= 0, .xmax=1},
-    {.name="SS_mu1_reliso04", .title="mu1 reliso04", .rebin = 1, .xmin= 0, .xmax=1},
-    {.name="SS_mu1_sip3d",    .title="mu1 sip3d",    .rebin = 5, .xmin= 0, .xmax=5},
+ 
+    //Object level plots:
+    {.name="SS_llep0_Pt",       .title="llep0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_llep0_Eta",      .title="llep0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_llep0_Phi",      .title="llep0 Phi",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_llep0_mT",       .title="llep0 mT",       .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_llep0_reliso03", .title="llep0 reliso03", .rebin = 1, .xmin= 0, .xmax=1},
+    {.name="SS_llep0_sip3d",    .title="llep0 sip3d",    .rebin = 5, .xmin= 0, .xmax=5},
+    {.name="SS_llepss_Pt",       .title="llepss pT",       .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_llepss_Eta",      .title="llepss Eta",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_llepss_Phi",      .title="llepss Phi",      .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_llepss_mT",       .title="llepss mT",       .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_llepss_reliso03", .title="llepss reliso03", .rebin = 1, .xmin= 0, .xmax=1},
+    {.name="SS_llepss_sip3d",    .title="llepss sip3d",    .rebin = 5, .xmin= 0, .xmax=5},
+    //Dilepton system:
+    {.name="SS_dilep_mass", .title="dilep mass (SS pair)", .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_dEta_llep",  .title="dEta (SS pair)",       .rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dPhi_llep",  .title="dPhi (SS pair)",       .rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dR_llep",    .title="dR (SS pair)",         .rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_ptratio",    .title="pT ratio (SS pair)",   .rebin = 10, .xmin= 0, .xmax=1},
     /*
-    {.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_dEta_muons",   .title="dEta (SS pair)",.rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_dPhi_muons",   .title="dPhi (SS pair)",.rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_dR_muons",     .title="dR (SS pair)",  .rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_ptratio",      .title="pT ratio (SS pair)",.rebin = 10, .xmin= 0, .xmax=1},
-    {.name="SS_met",          .title="MET",           .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_metphi",       .title="MET phi",       .rebin = 10, .xmin=-4, .xmax=4},
-    {.name="SS_LT",           .title="Sum(mu pT)",    .rebin = 10, .xmin= 0, .xmax=200},
-    {.name="SS_HT",           .title="Sum(Jet pT)",   .rebin = 100, .xmin= 0, .xmax=1000},
-    {.name="SS_nJet",         .title="nJet",          .rebin =  1, .xmin= 0, .xmax=10},
-    {.name="SS_nbJet",        .title="nbJet",         .rebin =  1, .xmin= 0, .xmax=10},
-    {.name="SS_dphi_mu0_met",   .title="dPhi (mu0, met)",.rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_dphi_muss_met",   .title="dPhi (mu1, met)",.rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_maxdphimet",   .title="max(dPhi mu, met)",.rebin = 20, .xmin= 0, .xmax=6},*/
-    /*
-    {.name="SS_cutflow",        .title="cutflow",       .rebin = 1, .xmin= 0, .xmax=10},
-    {.name="SS_cutflow_leading",.title="cutflow (mu0)", .rebin = 1, .xmin= 0, .xmax=20},
-    {.name="SS_cutflow_ssmuon", .title="cutflow (muss)",.rebin = 1, .xmin= 0, .xmax=20},*/
-
-    //{.name="SS_dimuon_mass",  .title="dimuon mass (SS pair)",  .rebin = 10, .xmin= 0, .xmax=200},
+    //Event level plots:
+    {.name="SS_nllep", .title="nllep", 1, 0, 10},
+    {.name="SS_nJet",  .title="nJet" , 1, 0, 10},
+    {.name="SS_nbJet", .title="nbJet", 1, 0, 10},
+    {.name="SS_met",    .title="MET",     .rebin = 10, .xmin= 0, .xmax=200},
+    {.name="SS_metphi", .title="MET phi", .rebin = 10, .xmin=-4, .xmax=4},
+    {.name="SS_LT",     .title="Sum(llep pT)", .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_HT",     .title="Sum(Jet pT)",  .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_ST",     .title="LT + HT",      .rebin = 50, .xmin= 0, .xmax=1000},
+    {.name="SS_STfrac", .title="LT/ST",        .rebin = 1,  .xmin= 0, .xmax=1},
+    {.name="SS_dPhi_met0",  .title="dPhi (llep0, MET)",  .rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dPhi_metss", .title="dPhi (llepss, MET)", .rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dPhi_met_max", .title="max dPhi (llep, MET)", .rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_dPhi_met_min", .title="min dPhi (llep, MET)", .rebin = 20, .xmin= 0, .xmax=6},*/
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -100,7 +98,8 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   bool toScaleHT      = false;
   bool toPrintBinInfo = false;
   float sigscale = 1;
-  TString tag = "_afterQCDscaling";
+  //TString tag = "_afterQCDscaling";
+  TString tag = "_withoutTrigEff";
   
   //###################################
   //Reading histograms and sorting them
@@ -140,12 +139,23 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
     SetOverflowBin(bkg[i].hist);
   }
 
+  //-------------------------------------------------------------------
   //SIGNAL:
   TString sigpath="inputs/"+jobname+"/signal/";
-  vector<TString> sigfile = {"hst_VLL100.root", "hst_VLL150.root"};
-  vector<float> lumi = {508761.54, 2092051.72}; // 595251 events /1.17 pb, 606695 events /0.290 pb
-  vector<int> col = {kRed, kBlack};
+  vector<TString> sigfile = {
+    "hst_VLL100.root",
+    "hst_VLL150.root"
+  };
+  vector<float> lumi = {
+    508761.54,
+    2092051.72
+  }; // 595251 events /1.17 pb, 606695 events /0.290 pb
+  vector<int> col = {
+    kRed,
+    kBlack
+  };
   //Make sure that the sizes of sigfile and lumi, col are the same.
+  //-------------------------------------------------------------------
 
   vector<TH1F*> sighist;
   for(int i=0; i<(int)sigfile.size(); i++){

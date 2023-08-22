@@ -134,9 +134,10 @@ vector<hst> read_files(vector<hst> vec, TString path, TString jobname, TString p
       //Lumiscaling:
       float scalefactor = 59700/vec[i].lumi;
       //QCD global scaling:
+      /*
       if(vec[i].group == "QCD_MuEnriched"){
         scalefactor = scalefactor*0.024164;
-      }
+	}*/
       hist->Scale(scalefactor);
       
       temp.hist = hist;
