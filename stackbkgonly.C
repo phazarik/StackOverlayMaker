@@ -28,11 +28,12 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackbkgonly(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  TString jobname = "hst_Aug22_Basic2LSS";
+  TString jobname = "hst_Aug22_2LSS_SfTrig";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
- 
+    {.name="SS_dilep_mass", .title="dilep mass (SS pair)", .rebin = 10, .xmin= 0, .xmax=200},
+    /*
     //Object level plots:
     {.name="SS_llep0_Pt",       .title="llep0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_llep0_Eta",      .title="llep0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
@@ -51,7 +52,7 @@ void stackbkgonly(){
     {.name="SS_dEta_llep",  .title="dEta (SS pair)",       .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dPhi_llep",  .title="dPhi (SS pair)",       .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dR_llep",    .title="dR (SS pair)",         .rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_ptratio",    .title="pT ratio (SS pair)",   .rebin = 10, .xmin= 0, .xmax=1},
+    {.name="SS_ptratio",    .title="pT ratio (SS pair)",   .rebin = 10, .xmin= 0, .xmax=1},*/
     /*
     //Event level plots:
     {.name="SS_nllep", .title="nllep", 1, 0, 10},
@@ -81,7 +82,7 @@ void stackbkgonly(){
     //break;
   }
 
-  cout<<"\nSucess!!\n"<<endl;
+  cout<<"Sucess!!\n"<<endl;
 }
 
 //#######################################################################################
@@ -94,12 +95,13 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   bool toLog          = true;
   bool toSetRange     = true;
   bool toOverlaySig   = true;
-  bool toOverlayData  = false;
+  bool toOverlayData  = true;
   bool toScaleHT      = false;
   bool toPrintBinInfo = false;
+  bool toAddEgamma    = true;
   float sigscale = 1;
   //TString tag = "_afterQCDscaling";
-  TString tag = "_withoutTrigEff";
+  TString tag = "_withEgamma";
   
   //###################################
   //Reading histograms and sorting them
@@ -184,10 +186,28 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
       SetOverflowBin(h);
 
       if(datahist == nullptr) datahist = (TH1F *)h->Clone(0);
-      else datahist->Add(h);
-      
+      else datahist->Add(h);      
     }
   }
+  //Adding EGamma:
+  TString datapath2 = "inputs/"+jobname+"/EGamma/";
+  vector<TString> datafile2 = {"hst_EGamma_A.root","hst_EGamma_B.root","hst_EGamma_C.root","hst_EGamma_D.root"};
+  TH1F * datahist2 = nullptr;
+  if(toOverlayData && toAddEgamma){
+    for(int i=0; i<(int)datafile2.size(); i++){
+      TString fullpath = datapath2+datafile2[i];
+      TFile *t = new TFile(fullpath);
+      TH1F *h = (TH1F *)t->Get(plotname);
+      SetHistoStyle(h, plotname, kBlack);
+      h->Rebin(binw);
+      SetOverflowBin(h);
+
+      if(datahist2 == nullptr) datahist2 = (TH1F *)h->Clone(0);
+      else datahist2->Add(h);      
+    }
+  }
+  if(toAddEgamma) datahist->Add(datahist2);
+  //Adding EGamma:
   
   //#################################################################
   //Preparing the stack:
@@ -259,13 +279,14 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   //Setting up the canvas:
   //######################
   TCanvas *c1 = new TCanvas(plotname,plotname,700,600);
+  TPad *mainPad, *ratioPad;
   
-  TPad *mainPad = create_mainpad();
+  mainPad = create_mainpad();
   mainPad->SetMargin(mainPad->GetLeftMargin(), mainPad->GetRightMargin(), 0.15, 0.1);
   if(toLog) mainPad->SetLogy(1);
   mainPad->Draw();
   
-  TPad *ratioPad = create_ratiopad();
+  ratioPad = create_ratiopad();
   ratioPad->SetMargin(ratioPad->GetLeftMargin(), ratioPad->GetRightMargin(), 0.2, 0.1);
   ratioPad->Draw();
 
@@ -377,6 +398,19 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 
   if(toSave){
     c1->SaveAs(dump_folder+"/"+plotname+".png");
+    //Deleting pointers to free up memory:
+    delete c1;
+    delete lg1;
+    delete rootb;
+    delete ratio;
+    delete datahist;
+    delete datahist2;
+    delete stack;
+    delete srb;
+    for(auto p : sighist){delete p;} sighist.clear();
+    for(auto p : bkg){delete p.hist;} bkg.clear();
   }
+
+  
   
 }
