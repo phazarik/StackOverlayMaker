@@ -36,7 +36,7 @@ TLegend *create_legend(){
 
 void SetHistoStyle(TH1F *h, TString plotname, int color){
   h->SetLineColor(color);
-  h->SetLineWidth(2);
+  h->SetLineWidth(1);
   h->SetMarkerStyle(20);
   h->SetMarkerSize(1.2);
   h->SetTitle("");
@@ -62,6 +62,11 @@ void SetHistoStyle(TH1F *h, TString plotname, int color){
   h->GetXaxis()->SetLabelOffset(0.02);
   //h->GetXaxis()->CenterTitle();
   //h->GetXaxis()->SetTickLength(-0.02);
+}
+
+void SetHistoStyle_bold(TH1F *h, TString plotname, int color){
+  SetHistoStyle(h, plotname,color);
+  h->SetLineWidth(2);
 }
 
 void PutText(TString jobname){

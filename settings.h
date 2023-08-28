@@ -43,6 +43,21 @@ struct merged{
   int color;
 };
 
+struct sig_struct{
+  TH1F *hist;
+  TString filename;
+  string mass;
+  float lumi;
+  int color;
+};
+
+//Signal list:
+vector<sig_struct> sig = {
+  {.filename = "hst_VLL100.root", .mass="100", .lumi= 508761.54, .color=kRed},
+  {.filename = "hst_VLL125.root", .mass="125", .lumi=1121365.00, .color=kMagenta},
+  {.filename = "hst_VLL150.root", .mass="150", .lumi=2092051.72, .color=kBlack}
+};
+
 //Sample list:
 vector<hst> hst_qcd = {
   {.group = "QCD_MuEnriched", .subgr="20to30",   .lumi= 23.893},
@@ -74,16 +89,20 @@ vector<hst> hst_dy = {
 };
 
 vector<hst> hst_singletop = {
-  {.group = "SingleTop", .subgr="s-channel_LeptonDecays",            .lumi=5456748.098},
-  {.group = "SingleTop", .subgr="t-channel_AntiTop_InclusiveDecays", .lumi=1407728.544},
-  {.group = "SingleTop", .subgr="t-channel_Top_InclusiveDecays",     .lumi=1572627.866},
-  {.group = "SingleTop", .subgr="tW_AntiTop_InclusiceDecays",        .lumi=238357.428},
-  {.group = "SingleTop", .subgr="tW_Top_InclusiveDecays",            .lumi=245177.196}
+  {.group = "SingleTop", .subgr="s-channelLeptonDecays",            .lumi=5456748.098},
+  {.group = "SingleTop", .subgr="t-channelAntiTop", .lumi=1407728.544},
+  {.group = "SingleTop", .subgr="t-channelTop",     .lumi=1572627.866},
+  {.group = "SingleTop", .subgr="tW_AntiTop",        .lumi=238357.428},
+  {.group = "SingleTop", .subgr="tW_Top",            .lumi=245177.196}
 };
 
 vector<hst> hst_ttbar = {
   {.group = "TTBar", .subgr="TTTo2L2Nu",        .lumi=1642541.624},
   {.group = "TTBar", .subgr="TTToSemiLeptonic", .lumi=1304012.700}
+};
+
+vector<hst> hst_ttw = {
+  {.group = "TTW", .subgr="TTWToLNu", .lumi=48627268.5}
 };
 
 vector<hst> hst_ww = {
@@ -104,38 +123,38 @@ vector<hst> hst_zz = {
   {.group = "ZZ", .subgr="ZZTo4L",    .lumi=74330566.038}
 };
 
-vector<hst> hst_data ={
-  {.group = "SingleMuon", .subgr="A", .lumi=59700},
-  {.group = "SingleMuon", .subgr="B", .lumi=59700},
-  {.group = "SingleMuon", .subgr="C", .lumi=59700},
-  {.group = "SingleMuon", .subgr="D", .lumi=59700},
-};
 
 //#################################################################################################
 vector<hst> read_files(vector<hst> vec, TString path, TString jobname, TString plotname){
-  //cout<<"Reading "<<vec[0].group<<" files ....";
   vector<hst> newvec;
-  for(int i=0; i<(int)vec.size(); i++){
+
+  for(int i=0; i<(int)vec.size(); i++){ 
     hst temp;
     temp.group = vec[i].group;
     temp.subgr = vec[i].subgr;
     temp.lumi = vec[i].lumi;
     
-    TString filename = path+jobname+"/"+vec[i].group+"/"+vec[i].group+"_"+vec[i].subgr+".root";
+    TString filename = path+jobname+"/"+vec[i].group+"/hst_"+vec[i].group+"_"+vec[i].subgr+".root";
+
     if(ifexists(filename)){
       TFile *tfile = new TFile(filename);
       TH1F *hist = (TH1F *)tfile->Get(plotname);
       
-      //Lumiscaling (including QCD global scaling:):
+      //Lumiscaling:
       float scalefactor = 59700/vec[i].lumi;
-      if(temp.group == "QCD_MuEnriched") scalefactor = scalefactor*0.0242004;
+      //QCD global scaling:
+      /*
+      if(vec[i].group == "QCD_MuEnriched"){
+        //scalefactor = scalefactor*0.024164;
+  	scalefactor = scalefactor*0.0172869;
+	}*/
       hist->Scale(scalefactor);
       
       temp.hist = hist;
       newvec.push_back(temp);
-    }  
+    }
+    //else cout<< "\033[33m" << "Warning!" << "\033[0m" << " The following file is missing: " << filename <<endl;
   }
-  //cout<<".... success!"<<endl;
   return newvec;
 }
 
@@ -151,6 +170,8 @@ merged merge_and_decorate(vector<hst> vec, TString samplename, TString plotname,
   HIST.hist = h;
   HIST.color = color;
   HIST.name = samplename;
+  if(HIST.hist->GetNbinsX() == 0 || HIST.hist->GetEntries() == 0)
+    cout<<"\033[33m"<<"Warning: The hst for sample "<<samplename<<" is a null."<<"\033[0m"<<endl;
   return HIST; 
 }
 
@@ -200,6 +221,35 @@ TH1F*find_sf(vector<merged> bkg, TH1F*data){
   float globalsf = (ndata_total-nothers_total)/nqcd_total;
   cout<<"\nQCD global scale factor = "<<globalsf<<"\t[keep this number!]\n"<<endl;
 
-  //qcd->Scale(globalsf);
+  qcd->Scale(0.0242004);
   return qcd;
 }
+
+TGraphErrors *get_err(TH1F* hist){ 
+  //Preparing the points:
+  int nBins = hist->GetNbinsX();
+  Double_t x[nBins];
+  Double_t y[nBins];
+  Double_t ex[nBins];
+  Double_t ey[nBins];
+  for (int i = 0; i < nBins; i++) {
+    int bin = i+1;
+    Double_t nevt = hist->GetBinContent(bin);
+    Double_t binlow = hist->GetBinLowEdge(bin);
+    Double_t binhi  = binlow + hist->GetBinWidth(bin);
+    Double_t nevtErr= hist->GetBinError(bin);
+    x[i]  = (binlow+binhi)/2;
+    ex[i] = (binhi-binlow)/2;
+    y[i]  = 1;
+    ey[i] = 0; if(nevt !=0) ey[i] = nevtErr/nevt;
+    //cout<<bin<<"\t"<<x[i]<<"\t"<<y[i]<<"\t"<<ex[i]<<"\t"<<ey[i]<<endl;
+  }
+
+  TGraphErrors *err = new TGraphErrors(nBins, x, y, ex, ey);
+  //Decoration:
+  err->SetMarkerStyle(0);
+  err->SetFillColor(kGray+1);
+  err->SetLineColor(kGray+1);
+  err->SetFillStyle(3001);
+  return err;
+} 
