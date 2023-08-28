@@ -33,10 +33,8 @@ void stackmaker(){
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
-    //{.name="SS_llep0_reliso03", .title="llep0 reliso03", .rebin = 1, .xmin= 0, .xmax=1},
-    {.name="SS_dilep_mass", .title="dilep mass (SS pair)", .rebin = 10, .xmin= 0, .xmax=200},
-    //{.name="SS_llep0_sip3d",    .title="llep0 sip3d",    .rebin = 5, .xmin= 0, .xmax=5},
-    //{.name="SS_HT",     .title="Sum(Jet pT)",  .rebin = 5, .xmin= 0, .xmax=100},
+    {.name="SS_STfrac", .title="LT/ST",        .rebin = 5,  .xmin= 0, .xmax=1},   
+    //{.name="SS_dilep_mass", .title="dilep mass (SS pair)", .rebin = 10, .xmin= 0, .xmax=200},
     /*
     //Object level plots:
     {.name="SS_llep0_Pt",       .title="llep0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
@@ -67,7 +65,7 @@ void stackmaker(){
     {.name="SS_LT",     .title="Sum(llep pT)", .rebin = 50, .xmin= 0, .xmax=1000},
     {.name="SS_HT",     .title="Sum(Jet pT)",  .rebin = 50, .xmin= 0, .xmax=1000},
     {.name="SS_ST",     .title="LT + HT",      .rebin = 50, .xmin= 0, .xmax=1000},
-    {.name="SS_STfrac", .title="LT/ST",        .rebin = 1,  .xmin= 0, .xmax=1},
+    {.name="SS_STfrac", .title="LT/ST",        .rebin = 5,  .xmin= 0, .xmax=1},
     {.name="SS_dPhi_met0",  .title="dPhi (llep0, MET)",  .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dPhi_metss", .title="dPhi (llepss, MET)", .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dPhi_met_max", .title="max dPhi (llep, MET)", .rebin = 20, .xmin= 0, .xmax=6},
@@ -107,6 +105,8 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   float sigscale = 1;
   TString tag = "";
   //TString tag = "";
+
+  if(toSave) gROOT->SetBatch(kTRUE);
   
   //###################################
   //Reading histograms and sorting them
@@ -343,6 +343,14 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   if(toOverlayData){    
     ratio = (TH1F*)datahist->Clone("copy");
     ratio->Divide(exp);
+    //Keep the error in data only:
+    // Copy the errors from h1 to the result histogram
+    for (int bin = 0; bin <= ratio->GetNbinsX(); bin++) {
+      int ndata = datahist->GetBinContent(bin);
+      double dataerr = 0;
+      if(ndata !=0) dataerr = datahist->GetBinError(bin)/ndata;
+      ratio->SetBinError(bin, dataerr);
+    }
     SetHistoStyle(ratio, plotname, kBlack);
     ratio->GetYaxis()->SetTitle("obs/exp");
     ratio->GetYaxis()->SetRangeUser(0, 2);
@@ -401,6 +409,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   if(toSave){
     c1->SaveAs(dump_folder+"/"+plotname+".png");
     //Deleting pointers to free up memory:
+    c1->Clear();
     delete c1;
     delete lg1;
     delete rootb;
