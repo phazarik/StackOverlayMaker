@@ -29,13 +29,14 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 void stackmaker(){
 
   TString path = "/mnt/d/work/GitHub/StackOverlayMaker/inputs/";
-  TString jobname = "hst_Aug28_Basic";
+  TString jobname = "hst_Sept20_Basic";
  
   struct varlist{ TString name; TString title; int rebin; float xmin; float xmax;};
   vector<varlist> variables = {
-    {.name="SS_STfrac", .title="LT/ST",        .rebin = 5,  .xmin= 0, .xmax=1},   
+    //{.name="SS_STfrac", .title="LT/ST",        .rebin = 5,  .xmin= 0, .xmax=1},   
     //{.name="SS_dilep_mass", .title="dilep mass (SS pair)", .rebin = 10, .xmin= 0, .xmax=200},
-    /*
+    //{.name="SS_llep0_reliso03", .title="llep0 reliso03", .rebin = 1, .xmin= 0, .xmax=1},
+    
     //Object level plots:
     {.name="SS_llep0_Pt",       .title="llep0 pT",       .rebin = 10, .xmin= 0, .xmax=200},
     {.name="SS_llep0_Eta",      .title="llep0 Eta",      .rebin = 10, .xmin=-4, .xmax=4},
@@ -54,7 +55,7 @@ void stackmaker(){
     {.name="SS_dEta_llep",  .title="dEta (SS pair)",       .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dPhi_llep",  .title="dPhi (SS pair)",       .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dR_llep",    .title="dR (SS pair)",         .rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_ptratio",    .title="pT ratio (SS pair)",   .rebin = 10, .xmin= 0, .xmax=1},*/
+    {.name="SS_ptratio",    .title="pT ratio (SS pair)",   .rebin = 10, .xmin= 0, .xmax=1},
     /*
     //Event level plots:
     {.name="SS_nllep", .title="nllep", 1, 0, 10},
@@ -69,7 +70,8 @@ void stackmaker(){
     {.name="SS_dPhi_met0",  .title="dPhi (llep0, MET)",  .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dPhi_metss", .title="dPhi (llepss, MET)", .rebin = 20, .xmin= 0, .xmax=6},
     {.name="SS_dPhi_met_max", .title="max dPhi (llep, MET)", .rebin = 20, .xmin= 0, .xmax=6},
-    {.name="SS_dPhi_met_min", .title="min dPhi (llep, MET)", .rebin = 20, .xmin= 0, .xmax=6},*/
+    {.name="SS_dPhi_met_min", .title="min dPhi (llep, MET)", .rebin = 20, .xmin= 0, .xmax=6},
+    {.name="SS_cutflow", .title="cutflow", 1, 0, 10},*/
   };
   
   for(int i=0; i<(int)variables.size(); i++){
@@ -93,17 +95,17 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   
   //Global settings: 
   bool toStack        = true;
-  bool toSave         = false;
+  bool toSave         = true;
   bool toLog          = true;
   bool toSetRange     = true;
   bool toOverlaySig   = true;
-  bool toOverlayData  = true;
+  bool toOverlayData  = false;
   bool toScaleHT      = false;
   bool toPrintBinInfo = false;
   bool toPlotUncertainty = true;
   bool toAddEgamma    = true;
   float sigscale = 1;
-  TString tag = "";
+  TString tag = "_scaled";
   //TString tag = "";
 
   if(toSave) gROOT->SetBatch(kTRUE);
@@ -326,6 +328,7 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
 
   //Drawing the rest:
   stack->Draw("hist same");
+  
   if(toOverlayData) datahist->Draw("ep same");
   for(int i =0; i<(int)sig.size(); i++) sig[i].hist->Draw("hist same");
   lg1->Draw("same");
@@ -404,9 +407,9 @@ void plot(TString path, TString jobname, TString plotname, TString plottitle, in
   //######################################################################
   TString date_stamp = todays_date();
   TString dump_folder = "outputs/"+date_stamp+"_"+jobname+tag;
-  createFolder(dump_folder);
-
+ 
   if(toSave){
+    createFolder(dump_folder);
     c1->SaveAs(dump_folder+"/"+plotname+".png");
     //Deleting pointers to free up memory:
     c1->Clear();

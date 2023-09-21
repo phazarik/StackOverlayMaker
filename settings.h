@@ -60,6 +60,7 @@ vector<sig_struct> sig = {
 
 //Sample list:
 vector<hst> hst_qcd = {
+  //Mu-enriched
   {.group = "QCD_MuEnriched", .subgr="20to30",   .lumi= 23.893},
   {.group = "QCD_MuEnriched", .subgr="30to50",   .lumi= 42.906},
   {.group = "QCD_MuEnriched", .subgr="50to80",   .lumi= 105.880},
@@ -69,7 +70,16 @@ vector<hst> hst_qcd = {
   {.group = "QCD_MuEnriched", .subgr="300to470", .lumi= 95249.242},
   {.group = "QCD_MuEnriched", .subgr="470to600", .lumi= 656872.156},
   {.group = "QCD_MuEnriched", .subgr="600to800", .lumi= 2060827.812},
-  {.group = "QCD_MuEnriched", .subgr="800to1000",.lumi= 11337379.457}
+  {.group = "QCD_MuEnriched", .subgr="800to1000",.lumi= 11337379.457},
+  //EM-enriched
+  {.group = "QCD_EMEnriched", .subgr="15to20",   .lumi= 5.96666541},
+  {.group = "QCD_EMEnriched", .subgr="20to30",   .lumi= 2.92664338},
+  {.group = "QCD_EMEnriched", .subgr="30to50",   .lumi= 1.33001225},
+  {.group = "QCD_EMEnriched", .subgr="50to80",   .lumi= 5.28031791},
+  {.group = "QCD_EMEnriched", .subgr="80to120",  .lumi= 25.76427755},
+  {.group = "QCD_EMEnriched", .subgr="120to170", .lumi= 145.33569605},
+  {.group = "QCD_EMEnriched", .subgr="170to300", .lumi= 223.50433213},
+  {.group = "QCD_EMEnriched", .subgr="300toInf", .lumi= 2007.24094203}
 };
 
 vector<hst> hst_wjets = {
@@ -141,13 +151,13 @@ vector<hst> read_files(vector<hst> vec, TString path, TString jobname, TString p
       TH1F *hist = (TH1F *)tfile->Get(plotname);
       
       //Lumiscaling:
-      float scalefactor = 59700/vec[i].lumi;
+      float scalefactor = 59800/vec[i].lumi;
       //QCD global scaling:
-      /*
+      
       if(vec[i].group == "QCD_MuEnriched"){
-        //scalefactor = scalefactor*0.024164;
-  	scalefactor = scalefactor*0.0172869;
-	}*/
+        scalefactor = scalefactor*0.861036;
+	//scalefactor = scalefactor*1;
+      }
       hist->Scale(scalefactor);
       
       temp.hist = hist;
